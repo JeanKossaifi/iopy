@@ -1,5 +1,5 @@
 import numpy as np
-from imageio import imread, imsave
+from PIL import Image
 from urllib import request
 from io import BytesIO
 
@@ -29,11 +29,11 @@ def read_image(name, flatten=False, to=None, dtype=None):
     False, and (size_img_y*size_img_x) otherwise
     """
     if to is None:
-        image = imread(name)
+        image = np.asarray(Image.open(name))
     elif to == 'rgb':
-        image = gray_to_rgb(imread(name))
+        image = gray_to_rgb(np.asarray(Image.open(name)))
     elif to == 'gray':
-        image = gray_to_rgb(imread(name, flatten=True))
+        image = rgb_to_gray(np.asarray(Image.open(name).convert('F')))
 
     if dtype is not None:
         image = image.astype(dtype)
@@ -73,7 +73,8 @@ def image_from_url(url, flatten=False, to_gray=False, dtype=None):
     read_image.
     """
     data = BytesIO(request.urlopen(url).read())
-    image = imread(data, flatten=to_gray)
+    image = rgb_to_gray(np.asarray(Image.open(data).convert('F'))) \
+        if to_gray else np.asarray(Image.open(data))
     if dtype is not None:
         image = image.astype(dtype)
     if flatten:
@@ -139,4 +140,5 @@ def save_image(filename, image, extension=None):
         file name extension. If a file object was used instead of a file name,
         this parameter should always be used.
     """
-    imsave(name=filename, arr=image, format=extension) 
+    image_out = Image.fromarray(image.astype(np.uint8))
+    image_out.save(filename, format=extension)
