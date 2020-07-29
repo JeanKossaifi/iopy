@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.misc import imread, imsave
+from imageio import imread, imsave
 from urllib import request
 from io import BytesIO
 
